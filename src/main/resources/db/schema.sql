@@ -10,7 +10,7 @@ USE daily_checkin;
 CREATE TABLE IF NOT EXISTS t_user (
     id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     openid          VARCHAR(64)  NOT NULL COMMENT '微信 openId',
-    nickname        VARCHAR(32)  NOT NULL DEFAULT '签到达人' COMMENT '昵称',
+    nickname        VARCHAR(32)  NOT NULL DEFAULT '' COMMENT '昵称，首次登录由服务端词库随机生成',
     avatar          VARCHAR(32)  NOT NULL DEFAULT 'sprout' COMMENT '预设头像标识',
     token           VARCHAR(64)  DEFAULT NULL COMMENT '登录凭证',
     token_expire_at DATETIME     DEFAULT NULL COMMENT '凭证过期时间',

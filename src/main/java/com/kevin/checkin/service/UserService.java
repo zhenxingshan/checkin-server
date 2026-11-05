@@ -3,6 +3,7 @@ package com.kevin.checkin.service;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kevin.checkin.common.BusinessException;
+import com.kevin.checkin.common.NicknameGenerator;
 import com.kevin.checkin.entity.User;
 import com.kevin.checkin.mapper.UserMapper;
 import com.kevin.checkin.vo.UserVO;
@@ -16,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class UserService {
 
-    public static final String DEFAULT_NICKNAME = "签到达人";
     public static final String DEFAULT_AVATAR = "sprout";
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -27,7 +27,7 @@ public class UserService {
     @Value("${checkin.token-ttl-hours:720}")
     private long tokenTtlHours;
 
-    /** 首次登录落库（默认昵称/头像），每次登录刷新凭证。 */
+    /** 首次登录落库（词库随机昵称/默认头像），每次登录刷新凭证；已有用户不覆盖昵称。 */
     public User loginByOpenid(String openid) {
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .eq(User::getOpenid, openid)
@@ -36,7 +36,7 @@ public class UserService {
         if (user == null) {
             user = new User();
             user.setOpenid(openid);
-            user.setNickname(DEFAULT_NICKNAME);
+            user.setNickname(pickNickname());
             user.setAvatar(DEFAULT_AVATAR);
             user.setCreatedAt(now);
             userMapper.insert(user);
@@ -47,6 +47,19 @@ public class UserService {
         user.setUpdatedAt(now);
         userMapper.updateById(user);
         return user;
+    }
+
+    /** 优先挑一个还没被占用的组合；连撞几次就允许重名，昵称本来就不要求全局唯一。 */
+    private String pickNickname() {
+        for (int i = 0; i < 5; i++) {
+            String name = NicknameGenerator.random();
+            Long used = userMapper.selectCount(new LambdaQueryWrapper<User>()
+                    .eq(User::getNickname, name));
+            if (used == null || used == 0L) {
+                return name;
+            }
+        }
+        return NicknameGenerator.random();
     }
 
     public UserVO current(Long userId) {
