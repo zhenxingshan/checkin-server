@@ -28,3 +28,5 @@ wx:
 checkin:
   token-ttl-hours: 720
   zone: Asia/Shanghai
+  # 每个用户最多可拥有的签到任务数（已删除的不占名额）
+  task-limit: 10

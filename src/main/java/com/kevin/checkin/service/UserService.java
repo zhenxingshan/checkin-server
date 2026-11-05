@@ -2,7 +2,6 @@ package com.kevin.checkin.service;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.kevin.checkin.common.BusinessException;
 import com.kevin.checkin.entity.User;
 import com.kevin.checkin.mapper.UserMapper;
@@ -77,14 +76,6 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateById(user);
         return toVO(user);
-    }
-
-    /** updateById 默认忽略 null，这里用 set(..., null) 显式清空凭证。 */
-    public void logout(Long userId) {
-        userMapper.update(null, new LambdaUpdateWrapper<User>()
-                .eq(User::getId, userId)
-                .set(User::getToken, null)
-                .set(User::getTokenExpireAt, null));
     }
 
     public static UserVO toVO(User user) {

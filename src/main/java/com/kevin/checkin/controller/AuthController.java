@@ -3,7 +3,6 @@ package com.kevin.checkin.controller;
 import com.kevin.checkin.common.Result;
 import com.kevin.checkin.dto.LoginDTO;
 import com.kevin.checkin.entity.User;
-import com.kevin.checkin.config.UserContext;
 import com.kevin.checkin.service.UserService;
 import com.kevin.checkin.service.WxAuthService;
 import com.kevin.checkin.vo.LoginVO;
@@ -32,11 +31,5 @@ public class AuthController {
         vo.setToken(user.getToken());
         vo.setUser(UserService.toVO(user));
         return Result.ok(vo);
-    }
-
-    @PostMapping("/logout")
-    public Result<Object> logout() {
-        userService.logout(UserContext.get());
-        return Result.ok(null);
     }
 }

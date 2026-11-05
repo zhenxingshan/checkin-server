@@ -8,8 +8,10 @@ import com.kevin.checkin.entity.CheckinRecord;
 import com.kevin.checkin.entity.CheckinTask;
 import com.kevin.checkin.mapper.CheckinRecordMapper;
 import com.kevin.checkin.mapper.CheckinTaskMapper;
+import com.kevin.checkin.mapper.UserMapper;
 import com.kevin.checkin.vo.TaskVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,12 @@ public class TaskService {
     @Autowired
     private CheckinRecordMapper recordMapper;
 
+    @Autowired
+    private UserMapper userMapper;
+
+    @Value("${checkin.task-limit:10}")
+    private int taskLimit;
+
     public List<TaskVO> list(Long userId) {
         return taskMapper.selectList(new LambdaQueryWrapper<CheckinTask>()
                         .eq(CheckinTask::getUserId, userId)
@@ -36,7 +44,18 @@ public class TaskService {
                 .stream().map(TaskService::toVO).collect(Collectors.toList());
     }
 
+    /**
+     * 每人最多 taskLimit 个任务。先锁用户行把同一用户的并发创建串行化，
+     * 再统计未删除的任务数（@TableLogic 自动排除已删除），最后才插入。
+     */
+    @Transactional(rollbackFor = Exception.class)
     public TaskVO create(Long userId, TaskDTO dto) {
+        userMapper.lockById(userId);
+        Long count = taskMapper.selectCount(new LambdaQueryWrapper<CheckinTask>()
+                .eq(CheckinTask::getUserId, userId));
+        if (count != null && count >= taskLimit) {
+            throw new BusinessException("TASK_LIMIT", "最多只能创建 " + taskLimit + " 个签到任务");
+        }
         TaskDTO payload = dto == null ? new TaskDTO() : dto;
         String title = StrUtil.nullToEmpty(payload.getTitle()).trim();
         if (title.isEmpty()) {
