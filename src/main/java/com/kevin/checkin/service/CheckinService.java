@@ -27,7 +27,6 @@ public class CheckinService {
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
-    private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private CheckinRecordMapper recordMapper;
@@ -139,12 +138,9 @@ public class CheckinService {
 
     public static RecordVO toVO(CheckinRecord record) {
         RecordVO vo = new RecordVO();
-        vo.setId(record.getId());
-        vo.setTaskId(record.getTaskId());
         vo.setDate(record.getCheckinDate() == null ? "" : record.getCheckinDate().format(DATE_FMT));
         vo.setTime(record.getCheckinTime());
         vo.setEarnedPoints(record.getPoints() == null ? 0 : record.getPoints());
-        vo.setCreatedAt(record.getCreatedAt() == null ? "" : record.getCreatedAt().format(DATETIME_FMT));
         return vo;
     }
 }

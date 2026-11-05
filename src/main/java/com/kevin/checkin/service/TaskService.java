@@ -16,14 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
-
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private CheckinTaskMapper taskMapper;
@@ -126,8 +123,6 @@ public class TaskService {
         vo.setTitle(task.getTitle());
         vo.setIcon(task.getIcon());
         vo.setColor(task.getColor());
-        vo.setNote(task.getNote());
-        vo.setCreatedAt(task.getCreatedAt() == null ? "" : task.getCreatedAt().format(FMT));
         return vo;
     }
 }

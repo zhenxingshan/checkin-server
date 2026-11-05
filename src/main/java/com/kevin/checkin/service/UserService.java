@@ -108,15 +108,11 @@ public class UserService {
 
     public static UserVO toVO(User user) {
         UserVO vo = new UserVO();
-        vo.setId(user.getId());
         vo.setOpenid(user.getOpenid());
         vo.setNickname(user.getNickname());
         vo.setAvatar(user.getAvatar());
-        vo.setOpenidSource(String.valueOf(user.getOpenid()).startsWith("dev_") ? "dev" : "wechat");
-        vo.setWechatCodeOk(true);
         vo.setLoggedIn(true);
         vo.setCreatedAt(format(user.getCreatedAt()));
-        vo.setLastLoginAt(format(user.getLastLoginAt()));
         return vo;
     }
 
