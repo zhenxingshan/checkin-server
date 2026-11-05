@@ -29,7 +29,7 @@ public class AuthController {
         User user = userService.loginByOpenid(openid);
         LoginVO vo = new LoginVO();
         vo.setToken(user.getToken());
-        vo.setUser(UserService.toVO(user));
+        vo.setUser(userService.toVOWithPoints(user));
         return Result.ok(vo);
     }
 }

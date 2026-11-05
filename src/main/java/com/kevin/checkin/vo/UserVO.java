@@ -28,4 +28,8 @@ public class UserVO {
 
     @JsonProperty("last_login_at")
     private String lastLoginAt;
+
+    /** 积分总览；老版本后台没有该字段时前端按默认值兜底。 */
+    @JsonProperty("points")
+    private PointVO points;
 }

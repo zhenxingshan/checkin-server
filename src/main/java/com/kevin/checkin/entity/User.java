@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,6 +20,10 @@ public class User {
     private String token;
     private LocalDateTime tokenExpireAt;
     private LocalDateTime lastLoginAt;
+    private Integer totalPoints;
+    private Integer pointStreak;
+    private LocalDate lastPointDate;
+    private Integer lastPointPoints;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

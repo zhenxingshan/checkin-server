@@ -30,3 +30,9 @@ checkin:
   zone: Asia/Shanghai
   # 每个用户最多可拥有的签到任务数（已删除的不占名额）
   task-limit: 10
+  # 签到积分：每天仅首次签到计分，连续签到按档位递增，断签回到初始档，单次不超过 max。
+  points:
+    base: 1          # 首次 / 断签后每次签到得分
+    step-days: 3     # 每连续几天升一档
+    step-points: 1   # 每档增加的得分
+    max: 5           # 单次签到得分上限

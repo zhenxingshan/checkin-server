@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -24,8 +26,14 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private PointService pointService;
+
     @Value("${checkin.token-ttl-hours:720}")
     private long tokenTtlHours;
+
+    @Value("${checkin.zone:Asia/Shanghai}")
+    private String zone;
 
     /** 首次登录落库（词库随机昵称/默认头像），每次登录刷新凭证；已有用户不覆盖昵称。 */
     public User loginByOpenid(String openid) {
@@ -63,7 +71,7 @@ public class UserService {
     }
 
     public UserVO current(Long userId) {
-        return toVO(getById(userId));
+        return toVOWithPoints(getById(userId));
     }
 
     public User getById(Long userId) {
@@ -88,7 +96,14 @@ public class UserService {
         }
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateById(user);
-        return toVO(user);
+        return toVOWithPoints(user);
+    }
+
+    /** 带积分总览的用户视图：登录响应也走这里，避免小程序首屏积分显示为 0。 */
+    public UserVO toVOWithPoints(User user) {
+        UserVO vo = toVO(user);
+        vo.setPoints(pointService.view(user, LocalDate.now(ZoneId.of(zone)), 0));
+        return vo;
     }
 
     public static UserVO toVO(User user) {

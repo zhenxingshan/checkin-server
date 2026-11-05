@@ -18,5 +18,7 @@ public class CheckinRecord {
     private Long taskId;
     private LocalDate checkinDate;
     private String checkinTime;
+    /** 本次签到获得的积分；当天非首次签到为 0。 */
+    private Integer points;
     private LocalDateTime createdAt;
 }
