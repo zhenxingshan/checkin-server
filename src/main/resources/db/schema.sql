@@ -1,13 +1,18 @@
 -- 每日签到后台 MySQL 建表脚本（MySQL 5.7+ / 8.0）
 -- 执行：mysql -uroot -p < db/schema.sql
+-- 建表语句已包含签到积分字段；当前库没有历史数据，重复执行会先删表重建。
 
 CREATE DATABASE IF NOT EXISTS daily_checkin
     DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE daily_checkin;
 
+DROP TABLE IF EXISTS t_checkin_record;
+DROP TABLE IF EXISTS t_checkin_task;
+DROP TABLE IF EXISTS t_user;
+
 -- 用户表：openId、昵称、头像 + 登录凭证
-CREATE TABLE IF NOT EXISTS t_user (
+CREATE TABLE t_user (
     id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     openid          VARCHAR(64)  NOT NULL COMMENT '微信 openId',
     nickname        VARCHAR(32)  NOT NULL DEFAULT '' COMMENT '昵称，首次登录由服务端词库随机生成',
@@ -28,7 +33,7 @@ CREATE TABLE IF NOT EXISTS t_user (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户信息';
 
 -- 签到任务表：按用户隔离，deleted 做逻辑删除
-CREATE TABLE IF NOT EXISTS t_checkin_task (
+CREATE TABLE t_checkin_task (
     id         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     user_id    BIGINT UNSIGNED NOT NULL,
     title      VARCHAR(32) NOT NULL COMMENT '任务名称',
@@ -43,7 +48,7 @@ CREATE TABLE IF NOT EXISTS t_checkin_task (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务';
 
 -- 签到记录表：唯一索引保证「用户 + 任务 + 日期」一天只能签一次
-CREATE TABLE IF NOT EXISTS t_checkin_record (
+CREATE TABLE t_checkin_record (
     id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     user_id      BIGINT UNSIGNED NOT NULL,
     task_id      BIGINT UNSIGNED NOT NULL,
