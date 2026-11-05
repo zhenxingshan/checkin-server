@@ -1,0 +1,42 @@
+package com.kevin.checkin.controller;
+
+import com.kevin.checkin.common.Result;
+import com.kevin.checkin.dto.LoginDTO;
+import com.kevin.checkin.entity.User;
+import com.kevin.checkin.config.UserContext;
+import com.kevin.checkin.service.UserService;
+import com.kevin.checkin.service.WxAuthService;
+import com.kevin.checkin.vo.LoginVO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private WxAuthService wxAuthService;
+
+    @Autowired
+    private UserService userService;
+
+    /** POST /api/auth/login { code } -> { token, user }，无需 token。 */
+    @PostMapping("/login")
+    public Result<LoginVO> login(@RequestBody(required = false) LoginDTO dto) {
+        String openid = wxAuthService.exchangeOpenid(dto == null ? null : dto.getCode());
+        User user = userService.loginByOpenid(openid);
+        LoginVO vo = new LoginVO();
+        vo.setToken(user.getToken());
+        vo.setUser(UserService.toVO(user));
+        return Result.ok(vo);
+    }
+
+    @PostMapping("/logout")
+    public Result<Object> logout() {
+        userService.logout(UserContext.get());
+        return Result.ok(null);
+    }
+}
