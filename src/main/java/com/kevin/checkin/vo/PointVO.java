@@ -32,4 +32,15 @@ public class PointVO {
 
     /** 单次签到积分上限。 */
     private Integer max;
+
+    /** 初始积分（断签后回到该值）。 */
+    private Integer base;
+
+    /** 每连续多少天升一档。 */
+    @JsonProperty("step_days")
+    private Integer stepDays;
+
+    /** 每档增加的积分；与 base、step_days、max 一起供前端生成档位表。 */
+    @JsonProperty("step_points")
+    private Integer stepPoints;
 }

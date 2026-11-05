@@ -57,6 +57,9 @@ public class PointService {
         vo.setStreak(user.getPointStreak() == null ? 0 : user.getPointStreak());
         vo.setGained(gained);
         vo.setMax(Math.max(0, max));
+        vo.setBase(Math.max(0, base));
+        vo.setStepDays(Math.max(1, stepDays));
+        vo.setStepPoints(Math.max(0, stepPoints));
         int next = nextStreak(user, today);
         int per = gainForStreak(next);
         vo.setPerCheckin(per);
