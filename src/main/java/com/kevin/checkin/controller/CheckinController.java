@@ -4,8 +4,10 @@ import com.kevin.checkin.common.Result;
 import com.kevin.checkin.config.UserContext;
 import com.kevin.checkin.dto.CheckinDTO;
 import com.kevin.checkin.service.CheckinService;
+import com.kevin.checkin.vo.CancelVO;
 import com.kevin.checkin.vo.RecordVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +30,12 @@ public class CheckinController {
                                        @RequestParam(required = false) String from,
                                        @RequestParam(required = false) String to) {
         return Result.ok(checkinService.list(UserContext.get(), taskId, from, to));
+    }
+
+    /** DELETE /api/checkins/today?taskId=1；只能撤销服务端当天，历史日期不可改。 */
+    @DeleteMapping("/today")
+    public Result<CancelVO> cancelToday(@RequestParam Long taskId) {
+        return Result.ok(checkinService.cancelToday(UserContext.get(), taskId));
     }
 
     /** POST /api/checkins { taskId, time }；日期由服务端决定。 */

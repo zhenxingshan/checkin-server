@@ -3,6 +3,7 @@ package com.kevin.checkin.controller;
 import com.kevin.checkin.common.Result;
 import com.kevin.checkin.config.UserContext;
 import com.kevin.checkin.dto.TaskDTO;
+import com.kevin.checkin.dto.TaskOrderDTO;
 import com.kevin.checkin.service.TaskService;
 import com.kevin.checkin.vo.TaskVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,12 @@ public class TaskController {
     @PostMapping
     public Result<TaskVO> create(@RequestBody(required = false) TaskDTO dto) {
         return Result.ok(taskService.create(UserContext.get(), dto));
+    }
+
+    /** POST /api/tasks/reorder { ids: [...] }，返回重排后的完整任务列表。 */
+    @PostMapping("/reorder")
+    public Result<List<TaskVO>> reorder(@RequestBody(required = false) TaskOrderDTO dto) {
+        return Result.ok(taskService.reorder(UserContext.get(), dto));
     }
 
     @PutMapping("/{id}")

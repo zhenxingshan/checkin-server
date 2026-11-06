@@ -16,6 +16,9 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+      # @TableLogic 字段取值：撤销置 1、有效为 0（与 schema.sql 建表默认值保持一致）
+      logic-delete-value: 1
+      logic-not-delete-value: 0
 
 # 小程序 AppID 是公开标识；AppSecret 必须只在服务端配置，严禁下发到小程序端。
 wx:

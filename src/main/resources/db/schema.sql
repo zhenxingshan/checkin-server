@@ -40,23 +40,29 @@ CREATE TABLE t_checkin_task (
     icon       VARCHAR(16) NOT NULL DEFAULT '🌱' COMMENT '任务图标(emoji)',
     color      VARCHAR(16) NOT NULL DEFAULT '#4C6FFF' COMMENT '主题色',
     note       VARCHAR(64) NOT NULL DEFAULT '' COMMENT '备注',
+    sort_order INT          NOT NULL DEFAULT 0 COMMENT '展示顺序，越小越靠前；上移/下移时整列重排',
     deleted    TINYINT      NOT NULL DEFAULT 0 COMMENT '0-正常 1-已删除',
     created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    KEY idx_user_deleted (user_id, deleted)
+    KEY idx_user_sort (user_id, deleted, sort_order)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到任务';
 
--- 签到记录表：唯一索引保证「用户 + 任务 + 日期」一天只能签一次
+-- 签到记录表：唯一索引保证「用户 + 任务 + 日期」一天只有一行
+-- deleted 做逻辑删除：撤销置 1 保留痕迹，同日再签到把同一行恢复为 0，
+-- 因此唯一索引不需要加 deleted，反复签到/撤销也不会新增行。
 CREATE TABLE t_checkin_record (
     id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     user_id      BIGINT UNSIGNED NOT NULL,
     task_id      BIGINT UNSIGNED NOT NULL,
     checkin_date DATE         NOT NULL COMMENT '签到日期(服务端当天)',
-    checkin_time VARCHAR(5)   NOT NULL DEFAULT '' COMMENT '签到时间 HH:mm',
+    checkin_time VARCHAR(5)   NOT NULL DEFAULT '' COMMENT '签到时间 HH:mm，恢复签到时刷新',
     points       INT          NOT NULL DEFAULT 0  COMMENT '本次签到获得的积分；当天非首次签到为 0',
-    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '首次签到时间',
+    updated_at   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后一次签到/撤销时间',
+    deleted      TINYINT      NOT NULL DEFAULT 0 COMMENT '0-有效 1-已撤销(逻辑删除)',
     PRIMARY KEY (id),
     UNIQUE KEY uk_user_task_date (user_id, task_id, checkin_date),
-    KEY idx_user_task (user_id, task_id, checkin_date)
+    KEY idx_user_task (user_id, task_id, checkin_date),
+    KEY idx_user_date_del (user_id, checkin_date, deleted)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '签到记录';
