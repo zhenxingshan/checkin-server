@@ -15,11 +15,22 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class UserService {
 
     public static final String DEFAULT_AVATAR = "sprout";
+
+    /**
+     * 头像标识白名单，必须与小程序端 {@code AVATAR_PRESETS} 的 key 完全一致：
+     * 新增/改名任意一项都要前后端同步，否则前端 presetOf() 会 fallback 成 sprout。
+     * 新用户从这里随机抽一个；updateProfile 也只允许落在集合内的 key。
+     */
+    private static final String[] AVATAR_KEYS = {
+            "sprout", "sun", "moon", "fire", "star", "leaf",
+            "panda", "rabbit", "fox", "bear", "chick", "fish",
+    };
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -35,7 +46,7 @@ public class UserService {
     @Value("${checkin.zone:Asia/Shanghai}")
     private String zone;
 
-    /** 首次登录落库（词库随机昵称/默认头像），每次登录刷新凭证；已有用户不覆盖昵称。 */
+    /** 首次登录落库（词库随机昵称/随机头像），每次登录刷新凭证；已有用户不覆盖昵称与头像。 */
     public User loginByOpenid(String openid) {
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .eq(User::getOpenid, openid)
@@ -45,7 +56,7 @@ public class UserService {
             user = new User();
             user.setOpenid(openid);
             user.setNickname(pickNickname());
-            user.setAvatar(DEFAULT_AVATAR);
+            user.setAvatar(pickAvatar());
             user.setCreatedAt(now);
             userMapper.insert(user);
         }
@@ -70,6 +81,24 @@ public class UserService {
         return NicknameGenerator.random();
     }
 
+    /** 新用户随机抽一个头像标识；数组为空（极端情况）时退回默认苗，保证不写 null。 */
+    private String pickAvatar() {
+        if (AVATAR_KEYS.length == 0) {
+            return DEFAULT_AVATAR;
+        }
+        return AVATAR_KEYS[ThreadLocalRandom.current().nextInt(AVATAR_KEYS.length)];
+    }
+
+    /** 头像只允许落在白名单内，避免脏 key 进库后前端 presetOf 兜底成苗。 */
+    private boolean isValidAvatar(String key) {
+        for (String k : AVATAR_KEYS) {
+            if (k.equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public UserVO current(Long userId) {
         return toVOWithPoints(getById(userId));
     }
@@ -92,7 +121,10 @@ public class UserService {
             user.setNickname(value.length() > 16 ? value.substring(0, 16) : value);
         }
         if (avatar != null && !avatar.trim().isEmpty()) {
-            user.setAvatar(avatar.trim());
+            String value = avatar.trim();
+            if (isValidAvatar(value)) {
+                user.setAvatar(value);
+            }
         }
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateById(user);
