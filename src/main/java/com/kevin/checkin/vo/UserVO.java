@@ -21,6 +21,10 @@ public class UserVO {
     @JsonProperty("created_at")
     private String createdAt;
 
+    /** 账号注册时的客户端 IP；老用户无该值返回 null。 */
+    @JsonProperty("register_ip")
+    private String registerIp;
+
     /** 积分总览；老版本后台没有该字段时前端按默认值兜底。 */
     @JsonProperty("points")
     private PointVO points;

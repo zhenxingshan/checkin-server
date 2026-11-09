@@ -20,6 +20,7 @@ CREATE TABLE t_user (
     token           VARCHAR(64)  DEFAULT NULL COMMENT '登录凭证',
     token_expire_at DATETIME     DEFAULT NULL COMMENT '凭证过期时间',
     last_login_at   DATETIME     DEFAULT NULL,
+    register_ip     VARCHAR(64)  DEFAULT NULL COMMENT '注册（首次登录）时的客户端 IP',
     -- 签到积分：按「用户 + 自然日」计，一天内多个任务只有首次签到计分。
     total_points      INT        NOT NULL DEFAULT 0  COMMENT '累计签到积分',
     point_streak      INT        NOT NULL DEFAULT 0  COMMENT '按自然日计的连续签到天数（决定积分档位）',

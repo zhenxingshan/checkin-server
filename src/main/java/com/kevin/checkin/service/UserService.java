@@ -46,8 +46,9 @@ public class UserService {
     @Value("${checkin.zone:Asia/Shanghai}")
     private String zone;
 
-    /** 首次登录落库（词库随机昵称/随机头像），每次登录刷新凭证；已有用户不覆盖昵称与头像。 */
-    public User loginByOpenid(String openid) {
+    /** 首次登录落库（词库随机昵称/随机头像），每次登录刷新凭证；已有用户不覆盖昵称与头像。
+     *  registerIp 仅在账号注册（首次建行）时写入，后续登录不再改动，保留最初注册来源。 */
+    public User loginByOpenid(String openid, String registerIp) {
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
                 .eq(User::getOpenid, openid)
                 .last("limit 1"));
@@ -57,6 +58,7 @@ public class UserService {
             user.setOpenid(openid);
             user.setNickname(pickNickname());
             user.setAvatar(pickAvatar());
+            user.setRegisterIp(registerIp);
             user.setCreatedAt(now);
             userMapper.insert(user);
         }
@@ -145,6 +147,7 @@ public class UserService {
         vo.setAvatar(user.getAvatar());
         vo.setLoggedIn(true);
         vo.setCreatedAt(format(user.getCreatedAt()));
+        vo.setRegisterIp(user.getRegisterIp());
         return vo;
     }
 

@@ -20,6 +20,7 @@ public class User {
     private String token;
     private LocalDateTime tokenExpireAt;
     private LocalDateTime lastLoginAt;
+    private String registerIp;
     private Integer totalPoints;
     private Integer pointStreak;
     private LocalDate lastPointDate;
